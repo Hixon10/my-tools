@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Denis Tools</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --link:#2563eb;
+      --border:#e5e7eb;
+      --shadow:0 10px 24px rgba(0,0,0,.06);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+    main{max-width:980px;margin:0 auto;padding:28px 16px 60px}
+    h1{margin:0 0 6px;font-size:28px}
+    .muted{color:var(--muted)}
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px;
+      margin-top:16px;
+      box-shadow:var(--shadow);
+    }
+    ul{margin:10px 0 0;padding-left:18px}
+    li{margin:12px 0}
+    a{color:var(--link);text-decoration:none;font-weight:650}
+    a:hover{text-decoration:underline}
+    code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      font-size:.95em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Denis Tools</h1>
+      <div class="muted">Public static toolbox (single-file pages).</div>
+    </header>
+
+    <section class="card">
+      <h2 style="margin:0 0 8px">Tools</h2>
+      <ul>
+        <li>
+          <a href="./diff.html">Diff lists</a>
+          <div class="muted">Trim lines, remove duplicates, show only-in-A / only-in-B / common.</div>
+        </li>
+        <li>
+          <a href="./to-sql-in.html">List → ("v1","v2",...)</a>
+          <div class="muted">Trim, dedupe, escape quotes, build tuple list.</div>
+        </li>
+      </ul>
+      <div class="muted" style="margin-top:10px">
+        Add a new tool by dropping a new <code>.html</code> file next to these and adding a link here.
+      </div>
+    </section>
+  </main>
+</body>
+</html>
