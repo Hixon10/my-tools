@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Diff lists</title>
+  <style>
+    :root{
+      --bg:#ffffff;
+      --panel:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --link:#2563eb;
+      --border:#e5e7eb;
+      --shadow:0 10px 24px rgba(0,0,0,.06);
+      --good:#059669;
+      --bad:#dc2626;
+      --btn:#111827;
+      --btnText:#ffffff;
+      --btn2:#ffffff;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:var(--bg);
+      color:var(--text);
+    }
+    main{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+    a{color:var(--link);text-decoration:none}
+    a:hover{text-decoration:underline}
+    h1{margin:10px 0 6px;font-size:26px}
+    h2{margin:0 0 8px;font-size:16px}
+    .muted{color:var(--muted)}
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px;
+      margin-top:14px;
+      box-shadow:var(--shadow);
+    }
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width: 900px){ .row{grid-template-columns:1fr} }
+    label{display:block;margin:0 0 6px;font-weight:650}
+    textarea{
+      width:100%;
+      min-height:240px;
+      resize:vertical;
+      background:#ffffff;
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:10px;
+      outline:none;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    }
+    textarea:focus{ border-color:#93c5fd; box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+    .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{
+      background:var(--btn2);
+      color:var(--text);
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:9px 12px;
+      cursor:pointer;
+    }
+    button:hover{border-color:#cbd5e1}
+    button.primary{
+      background:var(--btn);
+      color:var(--btnText);
+      border-color:var(--btn);
+    }
+    button.primary:hover{ filter:brightness(0.95); }
+    .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .pill{
+      font-size:12px;
+      padding:4px 8px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      background:#f9fafb;
+      color:var(--muted);
+    }
+    .pill.good{border-color:rgba(5,150,105,.25);color:var(--good);background:rgba(5,150,105,.06)}
+    .pill.bad{border-color:rgba(220,38,38,.25);color:var(--bad);background:rgba(220,38,38,.05)}
+    pre{
+      margin:0;
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      overflow:auto;
+      min-height:120px;
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+    }
+    .topnav{display:flex;gap:10px;align-items:center}
+    code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      font-size:.95em;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <nav class="topnav">
+      <a href="./index.html">← Home</a>
+      <span class="muted">/ Diff lists</span>
+    </nav>
+
+    <header>
+      <h1>Diff lists</h1>
+      <div class="muted">Rules: <strong>trim only</strong>, ignore empty lines, remove duplicates.</div>
+    </header>
+
+    <section class="card">
+      <div class="row">
+        <div>
+          <label for="a">List A</label>
+          <textarea id="a" placeholder="One item per line"></textarea>
+        </div>
+        <div>
+          <label for="b">List B</label>
+          <textarea id="b" placeholder="One item per line"></textarea>
+        </div>
+      </div>
+
+      <div class="btnbar">
+        <button class="primary" id="run">Diff</button>
+        <button id="swap">Swap A/B</button>
+        <button id="clear">Clear</button>
+      </div>
+
+      <div class="pills">
+        <span class="pill" id="countA">A unique: 0</span>
+        <span class="pill" id="countB">B unique: 0</span>
+        <span class="pill bad" id="countOnlyA">Only A: 0</span>
+        <span class="pill bad" id="countOnlyB">Only B: 0</span>
+        <span class="pill good" id="countCommon">Common: 0</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Only in A</h2>
+      <div class="btnbar">
+        <button id="copyOnlyA">Copy</button>
+      </div>
+      <pre id="onlyA"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Only in B</h2>
+      <div class="btnbar">
+        <button id="copyOnlyB">Copy</button>
+      </div>
+      <pre id="onlyB"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Common</h2>
+      <div class="btnbar">
+        <button id="copyCommon">Copy</button>
+      </div>
+      <pre id="common"></pre>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+
+    function splitLines(text){
+      return text.split(/\r?\n/).map(l => l.replace(/\uFEFF/g, ""));
+    }
+
+    function toUniqueTrimmedMap(text){
+      const m = new Map();
+      for (const line of splitLines(text)){
+        const v = line.trim();
+        if (!v) continue;
+        if (!m.has(v)) m.set(v, v);
+      }
+      return m;
+    }
+
+    function sortedKeys(map){
+      return Array.from(map.keys()).sort((a,b)=>a.localeCompare(b));
+    }
+
+    async function copy(text){
+      await navigator.clipboard.writeText(text);
+    }
+
+    function runDiff(){
+      const mapA = toUniqueTrimmedMap($("a").value);
+      const mapB = toUniqueTrimmedMap($("b").value);
+
+      const setA = new Set(mapA.keys());
+      const setB = new Set(mapB.keys());
+
+      const onlyA = [];
+      const onlyB = [];
+      const common = [];
+
+      for (const k of sortedKeys(mapA)){
+        if (setB.has(k)) common.push(k);
+        else onlyA.push(k);
+      }
+      for (const k of sortedKeys(mapB)){
+        if (!setA.has(k)) onlyB.push(k);
+      }
+
+      $("onlyA").textContent = onlyA.join("\n");
+      $("onlyB").textContent = onlyB.join("\n");
+      $("common").textContent = common.join("\n");
+
+      $("countA").textContent = `A unique: ${mapA.size}`;
+      $("countB").textContent = `B unique: ${mapB.size}`;
+      $("countOnlyA").textContent = `Only A: ${onlyA.length}`;
+      $("countOnlyB").textContent = `Only B: ${onlyB.length}`;
+      $("countCommon").textContent = `Common: ${common.length}`;
+    }
+
+    $("run").addEventListener("click", runDiff);
+    $("swap").addEventListener("click", () => {
+      const t = $("a").value;
+      $("a").value = $("b").value;
+      $("b").value = t;
+      runDiff();
+    });
+    $("clear").addEventListener("click", () => {
+      $("a").value = "";
+      $("b").value = "";
+      runDiff();
+    });
+
+    $("copyOnlyA").addEventListener("click", () => copy($("onlyA").textContent));
+    $("copyOnlyB").addEventListener("click", () => copy($("onlyB").textContent));
+    $("copyCommon").addEventListener("click", () => copy($("common").textContent));
+
+    runDiff();
+  </script>
+</body>
+</html>
