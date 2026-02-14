@@ -16,6 +16,10 @@
       --btn:#111827;
       --btnText:#ffffff;
       --btn2:#ffffff;
+ 
+      --ok:#059669;
+      --err:#dc2626;
+      --focus:#93c5fd;
     }
     *{box-sizing:border-box}
     body{
@@ -51,8 +55,11 @@
       outline:none;
       font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
     }
-    textarea:focus{ border-color:#93c5fd; box-shadow:0 0 0 3px rgba(37,99,235,.12); }
-    .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    textarea:focus{
+      border-color:var(--focus);
+      box-shadow:0 0 0 3px rgba(37,99,235,.12);
+    }
+    .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
     button{
       background:var(--btn2);
       color:var(--text);
@@ -78,18 +85,20 @@
       background:#f9fafb;
       color:var(--muted);
     }
-    pre{
-      margin:0;
-      background:#ffffff;
+ 
+    .status{
+      font-size:13px;
+      padding:6px 10px;
+      border-radius:10px;
       border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      overflow:auto;
-      min-height:120px;
-      white-space:pre-wrap;
-      word-break:break-word;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+      background:#f9fafb;
+      color:var(--muted);
+      display:none;
     }
+    .status.show{ display:inline-block; }
+    .status.ok{ border-color:rgba(5,150,105,.25); background:rgba(5,150,105,.06); color:var(--ok); }
+    .status.err{ border-color:rgba(220,38,38,.25); background:rgba(220,38,38,.05); color:var(--err); }
+ 
     .topnav{display:flex;gap:10px;align-items:center}
     code{
       font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
@@ -103,48 +112,61 @@
       <a href="./index.html">← Home</a>
       <span class="muted">/ List → tuple</span>
     </nav>
-
+ 
     <header>
       <h1>List → <code>("v1","v2",...)</code></h1>
-      <div class="muted">Trim lines, remove duplicates, escape quotes.</div>
+      <div class="muted">Trim lines, remove duplicates, escape quotes. Tip: click Output then <kbd>Ctrl</kbd>+<kbd>A</kbd>.</div>
     </header>
-
+ 
     <section class="card">
       <label for="input">Input (one per line)</label>
       <textarea id="input" placeholder="val1&#10;val2&#10;val3"></textarea>
-
+ 
       <div class="btnbar">
         <button class="primary" id="convert">Convert</button>
         <button id="clear">Clear</button>
       </div>
-
+ 
       <div class="pill" id="count">Unique: 0</div>
     </section>
-
+ 
     <section class="card">
       <h2>Output</h2>
       <div class="btnbar" style="margin-bottom: 10px;">
         <button id="copy">Copy</button>
+        <span class="status" id="status" aria-live="polite"></span>
       </div>
-      <pre id="output"></pre>
+      <!-- Use textarea (not pre) so Ctrl+A selects just this field when focused -->
+      <textarea id="output" readonly spellcheck="false" style="min-height:140px"></textarea>
     </section>
   </main>
-
+ 
   <script>
     const $ = (id) => document.getElementById(id);
-
+ 
     function splitLines(text){
       return text.split(/\r?\n/).map(l => l.replace(/\uFEFF/g, ""));
     }
-
+ 
     function escapeForDoubleQuotedTuple(s){
       return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
     }
-
+ 
+    function setStatus(kind, message){
+      const el = $("status");
+      el.className = "status show " + (kind || "");
+      el.textContent = message;
+      window.clearTimeout(setStatus._t);
+      setStatus._t = window.setTimeout(() => {
+        el.className = "status";
+        el.textContent = "";
+      }, 1400);
+    }
+ 
     function convert(){
       const seen = new Set();
       const vals = [];
-
+ 
       for (const line of splitLines($("input").value)){
         const v = line.trim();
         if (!v) continue;
@@ -152,20 +174,37 @@
         seen.add(v);
         vals.push(v);
       }
-
+ 
       const out = "(" + vals.map(v => `"${escapeForDoubleQuotedTuple(v)}"`).join(", ") + ")";
-      $("output").textContent = out;
+      $("output").value = out;
       $("count").textContent = `Unique: ${vals.length}`;
     }
-
-    async function copy(){
-      await navigator.clipboard.writeText($("output").textContent);
+ 
+    async function copyOutput(){
+      const text = $("output").value;
+      if (!text) {
+        setStatus("err", "Nothing to copy");
+        return;
+      }
+      try{
+        await navigator.clipboard.writeText(text);
+        setStatus("ok", "Copied");
+      } catch (e){
+        // Fallback: select output so user can Ctrl+C
+        $("output").focus();
+        $("output").select();
+        setStatus("err", "Clipboard blocked; selected output (press Ctrl+C)");
+      }
     }
-
-    $("convert").addEventListener("click", convert);
-    $("clear").addEventListener("click", () => { $("input").value = ""; convert(); });
-    $("copy").addEventListener("click", copy);
-
+ 
+    // Convenience: click output auto-selects all
+    $("output").addEventListener("focus", () => $("output").select());
+    $("output").addEventListener("click", () => $("output").select());
+ 
+    $("convert").addEventListener("click", () => { convert(); setStatus("", "Updated"); });
+    $("clear").addEventListener("click", () => { $("input").value = ""; convert(); setStatus("", "Cleared"); });
+    $("copy").addEventListener("click", copyOutput);
+ 
     convert();
   </script>
 </body>
