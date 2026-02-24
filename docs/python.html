@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Python WASM Editor</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #ffffff;
+      --surface:   #f5f5f7;
+      --border:    #d1d5db;
+      --accent:    #7c3aed;
+      --accent-hi: #6d28d9;
+      --text:      #1f2937;
+      --text-dim:  #6b7280;
+      --green:     #16a34a;
+      --red:       #dc2626;
+      --code-bg:   #fafafa;
+      --output-bg: #f9fafb;
+      --input-bg:  #fffef5;
+      --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", "Consolas", monospace;
+    }
+
+    body {
+      font-family: var(--font-mono);
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+    }
+
+    #status {
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      transition: all 0.3s;
+    }
+
+    #status.ready {
+      background: #ecfdf5;
+      border-color: #86efac;
+      color: var(--green);
+    }
+
+    #status.error {
+      background: #fef2f2;
+      border-color: #fca5a5;
+      color: var(--red);
+    }
+
+    /* ── Main Layout ── */
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      border: 0.5px solid var(--border);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    /* ── Textareas / Output ── */
+    textarea {
+      flex: 1;
+      width: 100%;
+      border: none;
+      padding: 14px;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      resize: none;
+      outline: none;
+      tab-size: 4;
+      color: var(--text);
+    }
+
+    textarea::placeholder { color: var(--text-dim); }
+
+    #editor {
+      background: var(--code-bg);
+    }
+
+    #inputData {
+      background: var(--input-bg);
+    }
+
+    #output {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: var(--output-bg);
+    }
+
+    #output .stdout  { color: var(--text); }
+    #output .stderr  { color: var(--red); }
+    #output .info    { color: var(--text-dim); font-style: italic; }
+    #output .success { color: var(--green); }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 4px 14px;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-weight: 600;
+    }
+
+    .btn-run {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-run:hover:not(:disabled) {
+      background: var(--accent-hi);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+    }
+
+    .btn-run:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      color: var(--text);
+      border-color: var(--text-dim);
+      background: var(--surface);
+    }
+
+    .buttons { display: flex; gap: 6px; }
+
+    /* ── File label ── */
+    .file-label {
+      font-size: 0.7rem;
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    /* ── Spinner ── */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .spinner {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1><span>🐍</span> Python WASM Editor</h1>
+    <div class="buttons">
+      <button class="btn btn-run" id="runBtn" disabled onclick="runCode()">▶ Run</button>
+      <div id="status">⏳ Loading…</div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Code Panel (top-left) -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>📝 Code</span>
+        <span class="buttons">
+          <span style="font-size:0.68rem; color:var(--text-dim)">Ctrl+Enter to run</span>
+        </span>
+      </div>
+      <textarea id="editor" spellcheck="false" placeholder="# Write your Python code here…">
+# Read from input.txt (populated from the Input panel)
+with open("input.txt", "r") as f:
+    data = f.read()
+
+print("=== Contents of input.txt ===")
+print(data)
+print()
+
+# Example: process each line
+lines = [line.strip() for line in data.strip().splitlines() if line.strip()]
+print(f"Total lines: {len(lines)}")
+for i, line in enumerate(lines, 1):
+    print(f"  Line {i}: {line} ({len(line)} chars)")
+</textarea>
+    </div>
+
+    <!-- Output Panel (top-right) -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>📤 Output</span>
+        <button class="btn btn-secondary" onclick="clearOutput()">✕ Clear</button>
+      </div>
+      <div id="output">
+        <span class="info">Run your code to see output here…</span>
+      </div>
+    </div>
+
+    <!-- Input Panel (bottom-left) -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>📥 Input Data <span class="file-label">input.txt</span></span>
+        <div class="buttons">
+          <label class="btn btn-secondary" style="cursor:pointer;">
+            📂 Load file
+            <input type="file" id="fileLoader" accept=".txt,.csv,.json,.xml,.dat,.log" hidden />
+          </label>
+          <button class="btn btn-secondary" onclick="clearInput()">✕ Clear</button>
+        </div>
+      </div>
+      <textarea id="inputData" spellcheck="false" placeholder="Paste or type your input data here. Your Python script can read this as input.txt …">Alice 25
+Bob 30
+Charlie 35
+Diana 28
+Eve 22</textarea>
+    </div>
+
+    <!-- Info / Help Panel (bottom-right) -->
+    <div class="panel">
+      <div class="panel-header">
+        <span>ℹ️ How it works</span>
+      </div>
+      <div style="padding:14px; font-size:0.82rem; line-height:1.7; color:var(--text-dim); overflow-y:auto;">
+        <p style="margin-bottom:10px;">
+          <strong style="color:var(--text);">📥 Input → 🐍 Script → 📤 Output</strong>
+        </p>
+        <p style="margin-bottom:8px;">
+          The <strong>Input Data</strong> panel contents are written to a virtual
+          <code style="background:#e0e7ff;color:#4338ca;padding:1px 5px;border-radius:3px;">input.txt</code>
+          file before each run.
+        </p>
+        <p style="margin-bottom:8px;">Your script can read it normally:</p>
+        <pre style="background:var(--surface);padding:10px;border-radius:6px;font-size:0.78rem;margin-bottom:10px;border:1px solid var(--border);"><code>with open("input.txt") as f:
+    data = f.read()</code></pre>
+        <p style="margin-bottom:8px;">Or line by line:</p>
+        <pre style="background:var(--surface);padding:10px;border-radius:6px;font-size:0.78rem;margin-bottom:10px;border:1px solid var(--border);"><code>with open("input.txt") as f:
+    for line in f:
+        print(line.strip())</code></pre>
+        <p style="margin-bottom:8px;">You can also <strong>load a file</strong> from disk using the 📂 button — it will populate the Input panel.</p>
+        <p style="margin-top: 14px; font-size: 0.75rem; color: var(--text-dim);">
+          ⌨️ <strong>Ctrl+Enter</strong> / <strong>⌘+Enter</strong> to run
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Load Pyodide from local files -->
+  <script src="pyodide/pyodide.js"></script>
+  <script>
+    // ── Elements ──
+    const editor    = document.getElementById("editor");
+    const inputData = document.getElementById("inputData");
+    const output    = document.getElementById("output");
+    const runBtn    = document.getElementById("runBtn");
+    const status    = document.getElementById("status");
+    const fileLoader = document.getElementById("fileLoader");
+
+    let pyodide = null;
+
+    // ── Helpers ──
+    function appendOutput(text, cls = "stdout") {
+      const span = document.createElement("span");
+      span.className = cls;
+      span.textContent = text;
+      output.appendChild(span);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function clearOutput() {
+      output.innerHTML = "";
+    }
+
+    function clearInput() {
+      inputData.value = "";
+    }
+
+    // ── Load file into input panel ──
+    fileLoader.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        inputData.value = ev.target.result;
+      };
+      reader.readAsText(file);
+      fileLoader.value = "";
+    });
+
+    // ── Tab key support in textareas ──
+    [editor, inputData].forEach((el) => {
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Tab") {
+          e.preventDefault();
+          const start = el.selectionStart;
+          const end   = el.selectionEnd;
+          el.value = el.value.substring(0, start) + "    " + el.value.substring(end);
+          el.selectionStart = el.selectionEnd = start + 4;
+        }
+      });
+    });
+
+    // ── Ctrl/Cmd + Enter to run (from anywhere) ──
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        runCode();
+      }
+    });
+
+    // ── Initialize Pyodide ──
+    async function initPyodide() {
+      try {
+        pyodide = await loadPyodide({
+          indexURL: "./pyodide/"
+        });
+
+        // Redirect stdout/stderr
+        pyodide.setStdout({
+          batched: (text) => appendOutput(text + "\n", "stdout")
+        });
+        pyodide.setStderr({
+          batched: (text) => appendOutput(text + "\n", "stderr")
+        });
+
+        status.textContent = "✅ Ready";
+        status.className   = "ready";
+        runBtn.disabled     = false;
+      } catch (err) {
+        status.textContent = "❌ Failed";
+        status.className   = "error";
+        appendOutput(`Failed to initialize Pyodide:\n${err.message}\n`, "stderr");
+      }
+    }
+
+    // ── Write input.txt to Pyodide's virtual filesystem ──
+    function writeInputFile() {
+      const content = inputData.value;
+      pyodide.FS.writeFile("input.txt", content);
+    }
+
+    // ── Run Code ──
+    async function runCode() {
+      if (!pyodide || runBtn.disabled) return;
+
+      const code = editor.value;
+      if (!code.trim()) {
+        clearOutput();
+        appendOutput("⚠ Nothing to run.\n", "info");
+        return;
+      }
+
+      clearOutput();
+      runBtn.disabled  = true;
+      runBtn.innerHTML = '<span class="spinner"></span>Running…';
+
+      try {
+        // Write input.txt to virtual FS before each run
+        writeInputFile();
+
+        const result = await pyodide.runPythonAsync(code);
+
+        if (result !== undefined && result !== null) {
+          const display = (typeof result.toString === "function")
+            ? result.toString()
+            : String(result);
+          if (display !== "undefined" && display !== "None") {
+            appendOutput(display + "\n", "success");
+          }
+        }
+      } catch (err) {
+        appendOutput(err.message + "\n", "stderr");
+      } finally {
+        runBtn.disabled  = false;
+        runBtn.innerHTML = "▶ Run";
+      }
+    }
+
+    // ── Boot ──
+    initPyodide();
+  </script>
+
+</body>
+</html>
