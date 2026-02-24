@@ -1,135 +1,208 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>List → ("v1","v2",...)</title>
   <style>
-    :root{
-      --bg:#ffffff;
-      --panel:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --link:#2563eb;
-      --border:#e5e7eb;
-      --shadow:0 10px 24px rgba(0,0,0,.06);
-      --btn:#111827;
-      --btnText:#ffffff;
-      --btn2:#ffffff;
- 
-      --ok:#059669;
-      --err:#dc2626;
-      --focus:#93c5fd;
+    :root {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --link: #2563eb;
+      --border: #e5e7eb;
+      --shadow: 0 10px 24px rgba(0, 0, 0, .06);
+      --btn: #111827;
+      --btnText: #ffffff;
+      --btn2: #ffffff;
+
+      --ok: #059669;
+      --err: #dc2626;
+      --focus: #93c5fd;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background:var(--bg);
-      color:var(--text);
+
+    * {
+      box-sizing: border-box
     }
-    main{max-width:980px;margin:0 auto;padding:20px 16px 60px}
-    a{color:var(--link);text-decoration:none}
-    a:hover{text-decoration:underline}
-    h1{margin:10px 0 6px;font-size:26px}
-    h2{margin:0 0 8px;font-size:16px}
-    .muted{color:var(--muted)}
-    .card{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:16px;
-      margin-top:14px;
-      box-shadow:var(--shadow);
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: var(--bg);
+      color: var(--text);
     }
-    label{display:block;margin:0 0 6px;font-weight:650}
-    textarea{
-      width:100%;
-      min-height:240px;
-      resize:vertical;
-      background:#ffffff;
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:10px;
-      outline:none;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px 16px 60px
     }
-    textarea:focus{
-      border-color:var(--focus);
-      box-shadow:0 0 0 3px rgba(37,99,235,.12);
+
+    a {
+      color: var(--link);
+      text-decoration: none
     }
-    .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
-    button{
-      background:var(--btn2);
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:9px 12px;
-      cursor:pointer;
+
+    a:hover {
+      text-decoration: underline
     }
-    button:hover{border-color:#cbd5e1}
-    button.primary{
-      background:var(--btn);
-      color:var(--btnText);
-      border-color:var(--btn);
+
+    h1 {
+      margin: 10px 0 6px;
+      font-size: 26px
     }
-    button.primary:hover{ filter:brightness(0.95); }
-    .pill{
-      display:inline-block;
-      margin-top:10px;
-      font-size:12px;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#f9fafb;
-      color:var(--muted);
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 16px
     }
- 
-    .status{
-      font-size:13px;
-      padding:6px 10px;
-      border-radius:10px;
-      border:1px solid var(--border);
-      background:#f9fafb;
-      color:var(--muted);
-      display:none;
+
+    .muted {
+      color: var(--muted)
     }
-    .status.show{ display:inline-block; }
-    .status.ok{ border-color:rgba(5,150,105,.25); background:rgba(5,150,105,.06); color:var(--ok); }
-    .status.err{ border-color:rgba(220,38,38,.25); background:rgba(220,38,38,.05); color:var(--err); }
- 
-    .topnav{display:flex;gap:10px;align-items:center}
-    code{
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-      font-size:.95em;
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    label {
+      display: block;
+      margin: 0 0 6px;
+      font-weight: 650
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 240px;
+      resize: vertical;
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      outline: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    textarea:focus {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    }
+
+    .btnbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      align-items: center
+    }
+
+    button {
+      background: var(--btn2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: #cbd5e1
+    }
+
+    button.primary {
+      background: var(--btn);
+      color: var(--btnText);
+      border-color: var(--btn);
+    }
+
+    button.primary:hover {
+      filter: brightness(0.95);
+    }
+
+    .pill {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--muted);
+    }
+
+    .status {
+      font-size: 13px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--muted);
+      display: none;
+    }
+
+    .status.show {
+      display: inline-block;
+    }
+
+    .status.ok {
+      border-color: rgba(5, 150, 105, .25);
+      background: rgba(5, 150, 105, .06);
+      color: var(--ok);
+    }
+
+    .status.err {
+      border-color: rgba(220, 38, 38, .25);
+      background: rgba(220, 38, 38, .05);
+      color: var(--err);
+    }
+
+    .topnav {
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: .95em;
     }
   </style>
 </head>
+
 <body>
   <main>
     <nav class="topnav">
       <a href="./index.html">← Home</a>
       <span class="muted">/ List → tuple</span>
     </nav>
- 
+
     <header>
       <h1>List → <code>("v1","v2",...)</code></h1>
-      <div class="muted">Trim lines, remove duplicates, escape quotes. Tip: click Output then <kbd>Ctrl</kbd>+<kbd>A</kbd>.</div>
+      <div class="muted">Trim lines, remove duplicates, escape quotes. Tip: click Output then
+        <kbd>Ctrl</kbd>+<kbd>A</kbd>.</div>
     </header>
- 
+
     <section class="card">
       <label for="input">Input (one per line)</label>
       <textarea id="input" placeholder="val1&#10;val2&#10;val3"></textarea>
- 
+
       <div class="btnbar">
         <button class="primary" id="convert">Convert</button>
         <button id="clear">Clear</button>
       </div>
- 
+
       <div class="pill" id="count">Unique: 0</div>
     </section>
- 
+
     <section class="card">
       <h2>Output</h2>
       <div class="btnbar" style="margin-bottom: 10px;">
@@ -140,19 +213,19 @@
       <textarea id="output" readonly spellcheck="false" style="min-height:140px"></textarea>
     </section>
   </main>
- 
+
   <script>
     const $ = (id) => document.getElementById(id);
- 
-    function splitLines(text){
+
+    function splitLines(text) {
       return text.split(/\r?\n/).map(l => l.replace(/\uFEFF/g, ""));
     }
- 
-    function escapeForDoubleQuotedTuple(s){
+
+    function escapeForDoubleQuotedTuple(s) {
       return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
     }
- 
-    function setStatus(kind, message){
+
+    function setStatus(kind, message) {
       const el = $("status");
       el.className = "status show " + (kind || "");
       el.textContent = message;
@@ -162,50 +235,51 @@
         el.textContent = "";
       }, 1400);
     }
- 
-    function convert(){
+
+    function convert() {
       const seen = new Set();
       const vals = [];
- 
-      for (const line of splitLines($("input").value)){
+
+      for (const line of splitLines($("input").value)) {
         const v = line.trim();
         if (!v) continue;
         if (seen.has(v)) continue;
         seen.add(v);
         vals.push(v);
       }
- 
+
       const out = "(" + vals.map(v => `"${escapeForDoubleQuotedTuple(v)}"`).join(", ") + ")";
       $("output").value = out;
       $("count").textContent = `Unique: ${vals.length}`;
     }
- 
-    async function copyOutput(){
+
+    async function copyOutput() {
       const text = $("output").value;
       if (!text) {
         setStatus("err", "Nothing to copy");
         return;
       }
-      try{
+      try {
         await navigator.clipboard.writeText(text);
         setStatus("ok", "Copied");
-      } catch (e){
+      } catch (e) {
         // Fallback: select output so user can Ctrl+C
         $("output").focus();
         $("output").select();
         setStatus("err", "Clipboard blocked; selected output (press Ctrl+C)");
       }
     }
- 
+
     // Convenience: click output auto-selects all
     $("output").addEventListener("focus", () => $("output").select());
     $("output").addEventListener("click", () => $("output").select());
- 
+
     $("convert").addEventListener("click", () => { convert(); setStatus("", "Updated"); });
     $("clear").addEventListener("click", () => { $("input").value = ""; convert(); setStatus("", "Cleared"); });
     $("copy").addEventListener("click", copyOutput);
- 
+
     convert();
   </script>
 </body>
+
 </html>

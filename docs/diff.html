@@ -1,107 +1,196 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
+  <link rel="icon" type="image/x-icon" href="./favicon.ico">
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Diff lists</title>
   <style>
-    :root{
-      --bg:#ffffff;
-      --panel:#ffffff;
-      --text:#111827;
-      --muted:#6b7280;
-      --link:#2563eb;
-      --border:#e5e7eb;
-      --shadow:0 10px 24px rgba(0,0,0,.06);
-      --good:#059669;
-      --bad:#dc2626;
-      --btn:#111827;
-      --btnText:#ffffff;
-      --btn2:#ffffff;
+    :root {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --link: #2563eb;
+      --border: #e5e7eb;
+      --shadow: 0 10px 24px rgba(0, 0, 0, .06);
+      --good: #059669;
+      --bad: #dc2626;
+      --btn: #111827;
+      --btnText: #ffffff;
+      --btn2: #ffffff;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background:var(--bg);
-      color:var(--text);
+
+    * {
+      box-sizing: border-box
     }
-    main{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
-    a{color:var(--link);text-decoration:none}
-    a:hover{text-decoration:underline}
-    h1{margin:10px 0 6px;font-size:26px}
-    h2{margin:0 0 8px;font-size:16px}
-    .muted{color:var(--muted)}
-    .card{
-      background:var(--panel);
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:16px;
-      margin-top:14px;
-      box-shadow:var(--shadow);
+
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: var(--bg);
+      color: var(--text);
     }
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width: 900px){ .row{grid-template-columns:1fr} }
-    label{display:block;margin:0 0 6px;font-weight:650}
-    textarea{
-      width:100%;
-      min-height:240px;
-      resize:vertical;
-      background:#ffffff;
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:10px;
-      outline:none;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 16px 60px
     }
-    textarea:focus{ border-color:#93c5fd; box-shadow:0 0 0 3px rgba(37,99,235,.12); }
-    .btnbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    button{
-      background:var(--btn2);
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:10px;
-      padding:9px 12px;
-      cursor:pointer;
+
+    a {
+      color: var(--link);
+      text-decoration: none
     }
-    button:hover{border-color:#cbd5e1}
-    button.primary{
-      background:var(--btn);
-      color:var(--btnText);
-      border-color:var(--btn);
+
+    a:hover {
+      text-decoration: underline
     }
-    button.primary:hover{ filter:brightness(0.95); }
-    .pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .pill{
-      font-size:12px;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px solid var(--border);
-      background:#f9fafb;
-      color:var(--muted);
+
+    h1 {
+      margin: 10px 0 6px;
+      font-size: 26px
     }
-    .pill.good{border-color:rgba(5,150,105,.25);color:var(--good);background:rgba(5,150,105,.06)}
-    .pill.bad{border-color:rgba(220,38,38,.25);color:var(--bad);background:rgba(220,38,38,.05)}
-    pre{
-      margin:0;
-      background:#ffffff;
-      border:1px solid var(--border);
-      border-radius:12px;
-      padding:12px;
-      overflow:auto;
-      min-height:120px;
-      white-space:pre-wrap;
-      word-break:break-word;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+
+    h2 {
+      margin: 0 0 8px;
+      font-size: 16px
     }
-    .topnav{display:flex;gap:10px;align-items:center}
-    code{
-      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
-      font-size:.95em;
+
+    .muted {
+      color: var(--muted)
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px
+    }
+
+    @media (max-width: 900px) {
+      .row {
+        grid-template-columns: 1fr
+      }
+    }
+
+    label {
+      display: block;
+      margin: 0 0 6px;
+      font-weight: 650
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 240px;
+      resize: vertical;
+      background: #ffffff;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      outline: none;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    textarea:focus {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+    }
+
+    .btnbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px
+    }
+
+    button {
+      background: var(--btn2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: #cbd5e1
+    }
+
+    button.primary {
+      background: var(--btn);
+      color: var(--btnText);
+      border-color: var(--btn);
+    }
+
+    button.primary:hover {
+      filter: brightness(0.95);
+    }
+
+    .pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px
+    }
+
+    .pill {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      color: var(--muted);
+    }
+
+    .pill.good {
+      border-color: rgba(5, 150, 105, .25);
+      color: var(--good);
+      background: rgba(5, 150, 105, .06)
+    }
+
+    .pill.bad {
+      border-color: rgba(220, 38, 38, .25);
+      color: var(--bad);
+      background: rgba(220, 38, 38, .05)
+    }
+
+    pre {
+      margin: 0;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      overflow: auto;
+      min-height: 120px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .topnav {
+      display: flex;
+      gap: 10px;
+      align-items: center
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: .95em;
     }
   </style>
 </head>
+
 <body>
   <main>
     <nav class="topnav">
@@ -169,13 +258,13 @@
   <script>
     const $ = (id) => document.getElementById(id);
 
-    function splitLines(text){
+    function splitLines(text) {
       return text.split(/\r?\n/).map(l => l.replace(/\uFEFF/g, ""));
     }
 
-    function toUniqueTrimmedMap(text){
+    function toUniqueTrimmedMap(text) {
       const m = new Map();
-      for (const line of splitLines(text)){
+      for (const line of splitLines(text)) {
         const v = line.trim();
         if (!v) continue;
         if (!m.has(v)) m.set(v, v);
@@ -183,15 +272,15 @@
       return m;
     }
 
-    function sortedKeys(map){
-      return Array.from(map.keys()).sort((a,b)=>a.localeCompare(b));
+    function sortedKeys(map) {
+      return Array.from(map.keys()).sort((a, b) => a.localeCompare(b));
     }
 
-    async function copy(text){
+    async function copy(text) {
       await navigator.clipboard.writeText(text);
     }
 
-    function runDiff(){
+    function runDiff() {
       const mapA = toUniqueTrimmedMap($("a").value);
       const mapB = toUniqueTrimmedMap($("b").value);
 
@@ -202,11 +291,11 @@
       const onlyB = [];
       const common = [];
 
-      for (const k of sortedKeys(mapA)){
+      for (const k of sortedKeys(mapA)) {
         if (setB.has(k)) common.push(k);
         else onlyA.push(k);
       }
-      for (const k of sortedKeys(mapB)){
+      for (const k of sortedKeys(mapB)) {
         if (!setA.has(k)) onlyB.push(k);
       }
 
@@ -241,4 +330,5 @@
     runDiff();
   </script>
 </body>
+
 </html>
